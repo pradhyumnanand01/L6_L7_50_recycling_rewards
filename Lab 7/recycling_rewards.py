@@ -13,7 +13,7 @@ def parse_collection(text):
         raise ValueError("Material cannot be empty")
 
     try:
-        weight = float(kg)
+        weight = float(kg.strip())
     except (ValueError, TypeError):
         raise ValueError("Weight must be numeric")
 
@@ -27,13 +27,18 @@ def weight_average(weights_csv):
     if not isinstance(weights_csv, str) or not weights_csv.strip():
         raise ValueError("Weights cannot be empty")
 
-    try:
-        values = [float(r.strip()) for r in weights_csv.split(',')]
-    except (ValueError, TypeError):
-        raise ValueError("All weights must be numeric")
+    parts = weights_csv.split(',')
 
-    if not values or any(not math.isfinite(v) or v < 0 for v in values):
-        raise ValueError("Weights must be finite and non-negative")
+    if any(not part.strip() for part in parts):
+        raise ValueError("Weights cannot contain empty values")
+
+    try:
+        values = [int(part.strip()) for part in parts]
+    except ValueError:
+        raise ValueError("All weights must be integers")
+
+    if any(v < 0 for v in values):
+        raise ValueError("Weights cannot be negative")
 
     return sum(values) // len(values)
 
@@ -45,8 +50,8 @@ def net_points(text):
     points, penalty = text.split('|')
 
     try:
-        points = float(points)
-        penalty = float(penalty)
+        points = float(points.strip())
+        penalty = float(penalty.strip())
     except (ValueError, TypeError):
         raise ValueError("Points and penalty must be numeric")
 
@@ -62,16 +67,25 @@ def net_points(text):
 
 def main():
     print("==== Running parse_collection ====")
-    user_input = input("Enter material:weight in kg (e.g. paper:12): ")
-    print("Material and Weight:", parse_collection(user_input))
+    user_input = input(
+        "Enter material:weight in kg (e.g. paper:12): "
+    )
+    result = parse_collection(user_input)
+    print("Material and Weight:", result)
 
     print("\n==== Running weight_average ====")
-    user_input = input("Enter weights in kg as CSV (e.g. 5,12,20): ")
-    print("Average Weight:", weight_average(user_input))
+    user_input = input(
+        "Enter weights in kg as CSV (e.g. 5,12,20): "
+    )
+    result = weight_average(user_input)
+    print("Average Weight:", result)
 
     print("\n==== Running net_points ====")
-    user_input = input("Enter points|penalty (e.g. 80|10): ")
-    print("Net Points:", net_points(user_input))
+    user_input = input(
+        "Enter points|penalty (e.g. 80|10): "
+    )
+    result = net_points(user_input)
+    print("Net Points:", result)
 
 
 if __name__ == "__main__":
